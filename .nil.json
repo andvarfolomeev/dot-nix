@@ -1,0 +1,8 @@
+{
+  "nix": {
+    "flake": {
+      "autoEvalInputs": true
+    },
+    "extraOptions": ["import ./modules", "import ./lib"]
+  }
+}
