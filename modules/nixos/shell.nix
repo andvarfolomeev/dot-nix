@@ -116,10 +116,11 @@ in
 
     programs.zsh.enable = true;
     programs.mtr.enable = mkIf cfg.netTools true;
+    programs.ssh.startAgent = true;
 
     programs.gnupg.agent = mkIf cfg.gnupg {
       enable = true;
-      enableSSHSupport = true;
+      enableSSHSupport = false;
       pinentryPackage = pkgs.pinentry-tty; # or pinentry-gnome3/pinentry-qt
     };
   };
