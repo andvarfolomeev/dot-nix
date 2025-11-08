@@ -25,13 +25,12 @@ in
     ../../modules/nixos/system.nix
   ];
 
-  gaming.enable = true;
-
   modules = {
     hardware = {
       graphics = true;
       amdgpu = true;
       bluetooth = true;
+      xboxController = true;
     };
     system = {
       timeZone = "Europe/Moscow";
@@ -41,21 +40,6 @@ in
         user = "andrei";
         dataDir = "/home/andrei/Documents";
         configDir = "/home/andrei/.config/syncthing";
-      };
-    };
-    desktop = {
-      vpn = {
-        enable = true;
-        amnezia = true;
-        forti = true;
-      };
-      x = true;
-      style = true;
-      gnome = false;
-      plasma = true;
-      access = {
-        ssh = true;
-        samba = true;
       };
     };
     shell = {
@@ -68,6 +52,31 @@ in
         node = true;
         nix = true;
       };
+    };
+    desktop = {
+      vpn = {
+        enable = true;
+        amnezia = true;
+        forti = true;
+      };
+      x = true;
+      style = false;
+      gnome = false;
+      plasma = true;
+      hypr = false;
+      access = {
+        ssh = true;
+        samba = false;
+      };
+    };
+    gaming = {
+      enable = true;
+      steam = true;
+      gamescope = true;
+      gamemode = true;
+      mangoHud = true;
+      coreCtrl = true;
+      performanceGovernor = true;
     };
   };
 

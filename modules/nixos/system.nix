@@ -13,6 +13,7 @@ let
     mkEnableOption
     mkIf
     mkMerge
+    mkDefault
     ;
 
   cfg = config.modules.system;
@@ -42,10 +43,22 @@ in
   };
 
   config = mkMerge [
-    # general
     {
       time.timeZone = cfg.timeZone;
       time.hardwareClockInLocalTime = true;
+
+      i18n.defaultLocale = "en_US.UTF-8";
+      i18n.extraLocaleSettings = {
+        LC_ADDRESS = "en_US.UTF-8";
+        LC_IDENTIFICATION = "en_US.UTF-8";
+        LC_MEASUREMENT = "en_US.UTF-8";
+        LC_MONETARY = "en_US.UTF-8";
+        LC_NAME = "en_US.UTF-8";
+        LC_NUMERIC = "en_US.UTF-8";
+        LC_PAPER = "en_US.UTF-8";
+        LC_TELEPHONE = "en_US.UTF-8";
+        LC_TIME = "en_US.UTF-8";
+      };
 
       boot = {
         loader = {
@@ -54,25 +67,9 @@ in
             canTouchEfiVariables = true;
             efiSysMountPoint = "/boot";
           };
-          # grub = {
-          #   enable = true;
-          #   default = "saved";
-          #   extraConfig = ''
-          #     GRUB_TIMEOUT_STYLE=menu
-          #     GRUB_SAVEDEFAULT=true
-          #   '';
-          #   device = "nodev";
-          #   efiSupport = true;
-          #   efiInstallAsRemovable = true;
-          #   useOSProber = true;
-          #   configurationLimit = 10;
-          # };
         };
-        # kernelParams = [
-        #   "mem_sleep=s2idle"
-        # ];
         supportedFilesystems = [ "ntfs" ];
-        # kernelPackages = pkgs.linuxPackages_latest;
+        kernelPackages = mkDefault pkgs.linuxPackages_latest;
       };
 
       environment.systemPackages = with pkgs; [
@@ -109,9 +106,7 @@ in
     }
 
     (mkIf cfg.docker {
-      virtualisation.docker = {
-        enable = true;
-      };
+      virtualisation.docker.enable = true;
       environment.systemPackages = with pkgs; [
         docker-compose
         docker-buildx

@@ -20,6 +20,11 @@
       url = "github:nix-community/lanzaboote/v0.4.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mcp-servers-nix.url = "github:natsukium/mcp-servers-nix";
+    nixvim = {
+      url = "github:nix-community/nixvim/nixos-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -30,6 +35,7 @@
       stylix,
       plasma-manager,
       lanzaboote,
+      nixvim,
       ...
     }:
     let
@@ -61,6 +67,7 @@
           home-manager.nixosModules.home-manager
           stylix.nixosModules.stylix
           lanzaboote.nixosModules.lanzaboote
+          nixvim.nixosModules.nixvim
 
           {
             home-manager = {
@@ -68,7 +75,11 @@
               backupFileExtension = "backup";
               users.andrei = import ./users/andrei.nix;
               users.andrei01tech = import ./users/andrei01tech.nix;
-              sharedModules = [ plasma-manager.homeModules.plasma-manager ];
+              extraSpecialArgs = { inherit nixvim; };
+              sharedModules = [
+                plasma-manager.homeModules.plasma-manager
+                nixvim.homeModules.nixvim
+              ];
             };
           }
         ];

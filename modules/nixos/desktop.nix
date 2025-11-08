@@ -27,6 +27,7 @@ in
     style = mkEnableOption "Enable Stylix";
     gnome = mkEnableOption "Gnome DE";
     plasma = mkEnableOption "Plasma DE";
+    hypr = mkEnableOption "Hyprland";
     access = {
       ssh = mkEnableOption "Open ssh";
       samba = mkEnableOption "Open SAMBA";
@@ -35,29 +36,17 @@ in
   };
 
   config = mkMerge [
-    # general
     {
-      i18n.defaultLocale = "en_US.UTF-8";
-      i18n.extraLocaleSettings = {
-        LC_ADDRESS = "ru_RU.UTF-8";
-        LC_IDENTIFICATION = "ru_RU.UTF-8";
-        LC_MEASUREMENT = "ru_RU.UTF-8";
-        LC_MONETARY = "ru_RU.UTF-8";
-        LC_NAME = "ru_RU.UTF-8";
-        LC_NUMERIC = "ru_RU.UTF-8";
-        LC_PAPER = "ru_RU.UTF-8";
-        LC_TELEPHONE = "ru_RU.UTF-8";
-        LC_TIME = "ru_RU.UTF-8";
-      };
-
       environment.systemPackages =
         (with pkgs; [
+          librewolf
           chromium
           keepassxc
           dbeaver-bin
           postman
           obsidian
           kitty
+          wireguard-ui
 
         ])
         ++ (with pkgs.unstable; [
@@ -121,11 +110,17 @@ in
     })
 
     (mkIf cfg.x {
-      services.xserver.enable = true;
+      services.xserver = {
+        enable = true;
+        xkb = {
+          layout = "us,ru";
+          options = "grp:win_space_toggle";
+        };
+        excludePackages = [ pkgs.xterm ];
+      };
     })
 
     (mkIf cfg.gnome {
-      services.xserver.enable = true;
       services.xserver.desktopManager.gnome.enable = true;
       services.xserver.displayManager.gdm.enable = true;
       environment.systemPackages = [ pkgs.gnomeExtensions.appindicator ];
@@ -134,7 +129,81 @@ in
 
     (mkIf cfg.plasma {
       services.displayManager.sddm.enable = true;
-      services.desktopManager.plasma6.enable = true;
+      services.desktopManager.plasma6 = {
+        enable = true;
+        enableQt5Integration = true;
+      };
+      programs.xwayland.enable = true;
+
+      security.rtkit.enable = true;
+      services.pipewire = {
+        enable = true;
+        pulse.enable = true;
+      };
+
+      xdg.portal = {
+        enable = true;
+        config = {
+          common.default = [ "kde" ];
+          kde.default = [ "kde" ];
+        };
+        extraPortals = with pkgs; [
+          kdePackages.kwallet
+          kdePackages.xdg-desktop-portal-kde
+          pkgs.xdg-desktop-portal-gtk
+        ];
+      };
+
+      environment.systemPackages = with pkgs; [
+        kdePackages.xdg-desktop-portal-kde
+        kdePackages.kpipewire
+      ];
+
+      environment.variables.NIXOS_OZONE_WL = "1";
+
+      systemd.user.services.xdg-desktop-portal.environment = {
+        XDG_CURRENT_DESKTOP = "KDE";
+        XDG_SESSION_TYPE = "wayland";
+        KDE_FULL_SESSION = "true";
+      };
+    })
+
+    (mkIf cfg.hypr {
+      services.displayManager.sddm.enable = true;
+
+      programs.hyprland = {
+        enable = true;
+        xwayland.enable = true;
+      };
+
+      environment.systemPackages =
+        (with pkgs; [
+          ironbar
+          rofi
+        ])
+        ++ (with pkgs.libsForQt5; [
+          dolphin
+          networkmanager-qt
+          bluez-qt
+          xwaylandvideobridge
+        ]);
+
+      services = {
+        udisks2 = {
+          enable = true;
+          mountOnMedia = true;
+        };
+        pipewire = {
+          enable = true;
+          alsa = {
+            enable = true;
+            support32Bit = true;
+          };
+          pulse.enable = true;
+          wireplumber.enable = true;
+        };
+        tumbler.enable = true;
+      };
     })
 
     (mkIf cfg.access.ssh {
